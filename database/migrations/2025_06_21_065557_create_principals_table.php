@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('principals', function (Blueprint $table) {
             $table->id();
             $table->uuid('principalId')->unique();
+            $table->foreignId('creator_id')->constrained('users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('checker_id')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
+            $table->foreignId('approver_id')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             $table->string('name');
             $table->string('category');
             $table->string('other_category')->nullable();
@@ -35,9 +38,6 @@ return new class extends Migration
             $table->enum('international_safety_certification_status', ['none', 'available']);
             $table->json('international_safety_certification')->nullable();
             $table->json('principal_checklist');
-            $table->foreignId('creator_id')->constrained('users')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('checker_id')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
-            $table->foreignId('approver_id')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             $table->enum('conclusion', ['recommended', 'not_recommended']);
             $table->text('follow_up_plan')->nullable();
             $table->timestamps();

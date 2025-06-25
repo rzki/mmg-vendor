@@ -16,7 +16,7 @@ class Principal extends Model
     protected function casts(): array {
         return [
             'domestic_related_documents' => 'array',
-            'international_quality_certifications' => 'array',
+            'international_quality_certification' => 'array',
             'international_safety_certification' => 'array',
             'principal_checklist' => 'array',
         ];

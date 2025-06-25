@@ -19,14 +19,24 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Resources\PrincipalResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\PrincipalResource\RelationManagers;
+use App\Filament\Resources\PrincipalResource\Pages\EditPrincipal;
+use App\Filament\Resources\PrincipalResource\Pages\ViewPrincipal;
+use App\Filament\Resources\PrincipalResource\Pages\ListPrincipals;
+use App\Filament\Resources\PrincipalResource\Pages\CreatePrincipal;
 
 class PrincipalResource extends Resource
 {
@@ -173,6 +183,9 @@ class PrincipalResource extends Resource
                                                 'GDP' => 'GDP',
                                             ])
                                             ->required(),
+                                        // TextInput::make('certification_name')
+                                        //     ->label('Certification Name')
+                                        //     ->required(),
                                     ])              
                                     ->deletable(false)
                                     ->reorderable(false)
@@ -198,14 +211,14 @@ class PrincipalResource extends Resource
                                                 'CE Marked' => 'CE Marked',
                                             ])
                                             ->required(),
-                                        TextInput::make('certification_name')
-                                            ->label('Certification Name')
-                                            ->required(),
+                                        // TextInput::make('certification_name')
+                                        //     ->label('Certification Name')
+                                        //     ->required(),
                                     ])              
                                     ->deletable(false)
                                     ->reorderable(false)
-                                    ->visible(fn ($get) => $get('type') === 'international' && $get('international_quality_certification_status') === 'available')
-                                    ->required(fn ($get) => $get('type') === 'international' && $get('international_quality_certification_status') === 'available'),
+                                    ->visible(fn ($get) => $get('type') === 'international' && $get('international_safety_certification_status') === 'available')
+                                    ->required(fn ($get) => $get('type') === 'international' && $get('international_safety_certification_status') === 'available'),
                             ]),
                         ]),
                     Wizard\Step::make('Principal Evaluation Checklist')
@@ -299,8 +312,16 @@ class PrincipalResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make()
+                    ->visible(fn ($record) => auth()->user()->hasRole(['Super Admin', 'Admin']) && $record->creator_id === auth()->user()->id)
+                    ->successNotification(
+                    Notification::make()
+                            ->success()
+                            ->title('User deleted')
+                            ->body('The user has been deleted successfully.'),
+                    )
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

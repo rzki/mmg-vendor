@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PrincipalResource\Pages;
 
 use Filament\Actions;
 use Illuminate\Support\Str;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\PrincipalResource;
 
@@ -20,5 +21,12 @@ class CreatePrincipal extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title('Principal Data Created')
+            ->body('The principal data has been successfully created');
     }
 }

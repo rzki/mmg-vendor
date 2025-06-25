@@ -31,7 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('')
             ->login()
             ->spa()
-            ->brandLogo(asset('assets/images/LOGO-MEDQUEST-HD.png'))
+            ->brandLogo(asset('assets/images/MMG-logo.png'))
             ->brandLogoHeight('2rem')
             ->defaultThemeMode(ThemeMode::Light)
             ->plugins([

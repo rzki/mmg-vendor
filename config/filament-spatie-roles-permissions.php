@@ -27,7 +27,7 @@ return [
      */
     'should_register_on_navigation' => [
         'permissions' => false,
-        'roles' => true,
+        'roles' => false,
     ],
 
     'should_show_permissions_for_roles' => true,

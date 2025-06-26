@@ -19,7 +19,7 @@ class ViewPrincipal extends ViewRecord
                 ->label('Mark as Checked')
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
-                ->visible(fn () => auth()->user()->hasRole(['Super Admin', 'Admin', 'Checker']))
+                ->visible(fn () => auth()->user()->hasRole(['Super Admin', 'Checker']))
                 ->action(function ($record) {
                     $record->checker_id = auth()->id();
                     $record->save();
@@ -29,7 +29,7 @@ class ViewPrincipal extends ViewRecord
                 ->label('Approve')
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
-                ->visible(fn () => auth()->user()->hasRole(['Super Admin', 'Manager', 'Head', 'BOD']))
+                ->visible(fn () => auth()->user()->hasRole(['Super Admin', 'Approver']))
                 ->action(function ($record) {
                     $record->checker_id = auth()->id();
                     $record->save();

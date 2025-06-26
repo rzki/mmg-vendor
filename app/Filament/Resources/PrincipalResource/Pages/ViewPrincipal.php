@@ -34,7 +34,11 @@ class ViewPrincipal extends ViewRecord
                     $record->checker_id = auth()->id();
                     $record->save();
                 }),
-            Actions\EditAction::make(),
+            Actions\EditAction::make()
+                ->label('Edit')
+                ->icon('heroicon-o-pencil')
+                ->color('primary')
+                ->visible(fn () => auth()->user()->hasRole(['Super Admin']))
 
         ];
     }

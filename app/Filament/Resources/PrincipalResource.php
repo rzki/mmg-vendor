@@ -7,6 +7,7 @@ use Filament\Tables;
 use Filament\Forms\Form;
 use App\Models\Principal;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Grid;
@@ -19,6 +20,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
+use Filament\Infolists\Components\Tabs;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -28,10 +30,16 @@ use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Infolists\Components\Tabs\Tab;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\BulkActionGroup;
+use Illuminate\Console\View\Components\Info;
 use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Infolists\Components\RepeatableEntry;
 use App\Filament\Resources\PrincipalResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Components\Fieldset as InfoFieldset;
 use App\Filament\Resources\PrincipalResource\RelationManagers;
 use App\Filament\Resources\PrincipalResource\Pages\EditPrincipal;
 use App\Filament\Resources\PrincipalResource\Pages\ViewPrincipal;
@@ -228,6 +236,7 @@ class PrincipalResource extends Resource
                                 ->schema([
                                     TextInput::make('question')
                                         ->label('Question')
+                                        ->readOnly()
                                         ->required(),
                                     Radio::make('result')
                                         ->label('Result')
@@ -327,6 +336,164 @@ class PrincipalResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Tabs::make('Principal')
+                    ->columns(4)
+                    ->tabs([
+                        Tab::make('Principal Data')
+                            ->icon('heroicon-o-information-circle')
+                            ->schema([
+                                TextEntry::make('name')
+                                    ->label('Principal Name'),
+                                TextEntry::make('category')
+                                    ->label('Principal Category')
+                                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                TextEntry::make('other_category')
+                                    ->label('Other Category')
+                                    ->visible(fn ($record) => $record->category === 'others'),
+                                TextEntry::make('email')
+                                    ->label('Email'),
+                                TextEntry::make('phone')
+                                    ->label('Phone'),
+                                TextEntry::make('address')
+                                    ->label('Address'),
+                                TextEntry::make('product_name')
+                                    ->label('Product Name'),
+                                TextEntry::make('payment_type')
+                                    ->label('Payment Type')
+                                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                TextEntry::make('payment_type_name')
+                                    ->label('Payment Type Name')
+                                    ->visible(fn ($record) => $record->payment_type === 'others'),
+                            ]),
+                        Tab::make('Principal Legality')
+                            ->icon('heroicon-o-document-text')
+                            ->schema([
+                                TextEntry::make('type')
+                                    ->label('Principal Type')
+                                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                InfoSection::make('Domestic Legality')
+                                    ->visible(fn ($record) => $record->type === 'domestic')
+                                    ->schema([
+                                        TextEntry::make('domestic_nib_status')
+                                            ->label('Business Identification Number No. (NIB)')
+                                            ->visible(fn ($record) => $record->type === 'domestic'),
+                                        TextEntry::make('domestic_nib')
+                                            ->label('Domestic NIB')
+                                            ->visible(fn ($record) => $record->type === 'domestic' && $record->domestic_nib_status === 'available'),
+                                        TextEntry::make('domestic_certificate_status')
+                                            ->label('Certificate (Akta)')
+                                            ->visible(fn ($record) => $record->type === 'domestic'),
+                                        TextEntry::make('domestic_certificate')
+                                            ->label('Domestic Certificate')
+                                            ->visible(fn ($record) => $record->type === 'domestic' && $record->domestic_certificate_status === 'available'),
+                                        TextEntry::make('domestic_related_documents_status')
+                                            ->label('Related Permits/Certificates')
+                                            ->visible(fn ($record) => $record->type === 'domestic'),
+                                        RepeatableEntry::make('domestic_related_documents')
+                                            ->label('Domestic Related Documents')
+                                            ->schema([
+                                                TextEntry::make('related_document_certification_name')
+                                                    ->label('Certification'),
+                                                TextEntry::make('certification_name')
+                                                    ->label('Document Name'),
+                                            ])
+                                            ->visible(fn ($record) => $record->type === 'domestic' && $record->domestic_related_documents_status === 'available'),
+                                    ]),
+
+                                InfoSection::make('International Legality')
+                                    ->visible(fn ($record) => $record->type === 'international')
+                                    ->schema([
+                                        InfoSection::make('Quality Certification')
+                                            ->label('Quality Certification (ISO / GMP / GDP)')
+                                            ->columns(2)
+                                            ->visible(fn ($record) => $record->type === 'international')
+                                            ->schema([
+                                                TextEntry::make('international_quality_certification_status')
+                                                    ->label('Quality Certification (ISO / GMP / GDP)')
+                                                    ->visible(fn ($record) => $record->type === 'international')
+                                                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                                RepeatableEntry::make('international_quality_certification')
+                                                    ->label('International Quality Certification')
+                                                    ->schema([
+                                                        TextEntry::make('quality_certification_name')
+                                                            ->label('Quality Certification Name')
+                                                            ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                                    ])
+                                                    ->visible(fn ($record) => $record->type === 'international' && $record->international_quality_certification_status === 'available'),
+
+                                                ]),
+                                        InfoSection::make('Safety Certification')
+                                            ->label('Safety Certification (FDA / CE-IVD / CE Marked)')
+                                            ->columns(2)
+                                            ->visible(fn ($record) => $record->type === 'international')
+                                            ->schema([
+                                                TextEntry::make('international_safety_certification_status')
+                                                    ->label('FDA / CE-IVD / CE Marked')
+                                                    ->visible(fn ($record) => $record->type === 'international')
+                                                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                                RepeatableEntry::make('international_safety_certification')
+                                                    ->label('International Safety Certification')
+                                                    ->schema([
+                                                        TextEntry::make('safety_certification_name')
+                                                            ->label('Safety Certification Name')
+                                                            ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                                    ])
+                                                    ->visible(fn ($record) => $record->type === 'international' && $record->international_safety_certification_status === 'available')
+                                            ]),
+                                    ]),
+                                ]),
+                        Tab::make('Principal Evaluation Checklist')
+                            ->icon('heroicon-o-check-circle')
+                            ->columns(1)
+                            ->schema([
+                                RepeatableEntry::make('principal_checklist')
+                                    ->label('Principal Checklist')
+                                    ->columns(2)
+                                    ->schema([
+                                        TextEntry::make('question')
+                                            ->label('Question'),
+                                        TextEntry::make('result')
+                                            ->label('Result')
+                                            ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                        InfoFieldset::make('Quality Management System')
+                                            ->visible(fn ($state) =>
+                                                ($state['question'] ?? null) === 'Does the company have a valid Quality Management System? If yes, please specify:' && ($state['result'] ?? null) === 'yes'
+                                            )
+                                            ->schema([
+                                                RepeatableEntry::make('quality_management_system')
+                                                    ->label('')
+                                                    ->schema([
+                                                        TextEntry::make('system_name')
+                                                            ->label('Name'),
+                                                    ])
+                                                    ->columnSpanFull()
+                                            ]),
+                                        InfoFieldset::make('Common Product Complaints')
+                                            ->visible(fn ($state) => 
+                                                ($state['question'] ?? null) === 'Do many customers complain about the product? If yes, please explain the common product complaints:' && ($state['result'] ?? null) === 'yes'
+                                            )
+                                            ->schema([
+                                                TextEntry::make('common_complaints')
+                                                    ->label('Please state the common product complaints')
+                                                    ->columnSpanFull(),
+                                            ]),
+                                            
+                                        ]),
+                                    TextEntry::make('conclusion')
+                                        ->label('Conclusion')
+                                        ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                    TextEntry::make('follow_up_plan')
+                                        ->label('Follow Up Plan')
+                                        ->visible(fn ($record) => $record->conclusion === 'not_recommended' && $record->conclusion !== null),
+                            ])
+                        ])->columnSpanFull()
             ]);
     }
 

@@ -33,6 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             ->brandLogo(asset('assets/images/MMG-logo.png'))
             ->brandLogoHeight('2rem')
+            ->favicon(asset('assets/images/MMG-logo.png'))
             ->defaultThemeMode(ThemeMode::Light)
             ->plugins([
                 FilamentSpatieRolesPermissionsPlugin::make()

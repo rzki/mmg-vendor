@@ -8,6 +8,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\UserMenuItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -31,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('')
             ->login()
             ->spa()
+            ->profile()
             ->brandLogo(asset('assets/images/MMG-logo.png'))
             ->brandLogoHeight('2rem')
             ->defaultThemeMode(ThemeMode::Light)
@@ -38,6 +40,10 @@ class AdminPanelProvider extends PanelProvider
                 FilamentSpatieRolesPermissionsPlugin::make()
             ])
             ->theme(asset('css/filament/admin/theme.css'))
+            ->userMenuItems([
+                'profile' => UserMenuItem::make()
+                    ->label('Edit Profile')
+            ])
             ->colors([
                 'primary' => Color::Blue,
             ])

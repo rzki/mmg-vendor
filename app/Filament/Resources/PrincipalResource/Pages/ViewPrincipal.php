@@ -45,7 +45,7 @@ class ViewPrincipal extends ViewRecord
             Actions\Action::make('checked')
                 ->label('Checked')
                 ->icon('heroicon-o-eye')
-                ->color('info')
+                ->color('success')
                 ->visible(fn ($record) => is_null($record->checker_id) && auth()->user()->hasRole(['Super Admin', 'Checker']))
                 ->action(function ($record) {
                     $record->checker_id = auth()->id();
